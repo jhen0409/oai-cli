@@ -50,7 +50,7 @@ oai -f ./input.toml -o ./output.toml
 Result:
 
 ```
-> oai -f ./input.toml
+> oai -f ./input.toml -o ./output.toml
 The week is almost done, you see,
 It's Thursday, happy as can be!
 ```
