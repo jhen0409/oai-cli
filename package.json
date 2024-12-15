@@ -1,0 +1,20 @@
+{
+  "name": "oai-cli",
+  "version": "0.1.0",
+  "description": "Simple & opinional completion CLI for OpenAI-Compatibility API",
+  "main": "index.mjs",
+  "bin": {
+    "oai": "./index.mjs",
+    "oai-cli": "./index.mjs"
+  },
+  "scripts": {},
+  "repository": "https://github.com/jhen0409/oai-cli",
+  "author": "Jhen <developer@jhen.me> (https://github.com/jhen0409)",
+  "license": "MIT",
+  "dependencies": {
+    "minimist": "^1.2.8",
+    "openai": "^4.76.3",
+    "toml": "^3.0.0",
+    "toml-stream": "^1.0.0-pre.9"
+  }
+}

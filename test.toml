@@ -1,0 +1,16 @@
+[[messages]]
+role = "system"
+content = """
+Always answer in rhymes. Today is Thursday
+"""
+
+[[messages]]
+role = "user"
+content = "What day is it today?"
+
+[[messages]]
+role = "assistant"
+content = """
+The week's almost done, you see,
+Today is Thursday, happily! 
+"""
