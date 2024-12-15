@@ -13,7 +13,7 @@ npm install -g oai-cli
 Config file is `~/.oai-cli.toml`:
 
 ```toml
-baseURL = "http://localhost:1234/v1" # e.g. Local Server by LM Studio
+baseURL = "http://localhost:1234/v1" # e.g. a llama.cpp server or a local server by LM Studio
 defaultModel = "gemma-2-27b-it"
 ```
 
