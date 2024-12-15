@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import OpenAI from 'openai'
 import toml from 'toml'
 import TOMLStream from 'toml-stream'
