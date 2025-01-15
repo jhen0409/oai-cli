@@ -53,15 +53,11 @@ if (argv['config']) {
     console.error(`Config ${argv['config']} not found`)
     process.exit(1)
   }
-  if (!configItem.endpoint) {
-    console.error('Config endpoint is required')
-    process.exit(1)
-  }
   if (!config.model) {
     console.error('Config model is required')
     process.exit(1)
   }
-  endpoint = configItem.endpoint
+  if (configItem.endpoint) endpoint = configItem.endpoint
   model = configItem.model
   apiKey = configItem.apiKey || apiKey
 }
@@ -95,7 +91,6 @@ const response = await oai.chat.completions.create({
   model,
   messages,
   tools,
-  max_tokens: -1,
   temperature: argv['temperature'] || 0.8,
   stream: true,
 })
@@ -103,12 +98,27 @@ const response = await oai.chat.completions.create({
 let content = ''
 const result = { messages: [] }
 
+const toolCalls = []
+
 for await (const chunk of response) {
   const choice = chunk.choices[0]
-  const delta = choice.delta.content
-  if (delta) {
-    content += delta
-    process.stdout.write(delta)
+  const { content: deltaContent, tool_calls: deltaToolCalls } = choice.delta
+  if (deltaContent) {
+    content += deltaContent
+    process.stdout.write(deltaContent)
+  }
+  if (deltaToolCalls) {
+    deltaToolCalls.forEach((tc, index) => {
+      if (!toolCalls[index]) toolCalls[index] = tc
+      else
+        toolCalls[index] = {
+          ...toolCalls[index],
+          function: {
+            ...toolCalls[index].function,
+            arguments: toolCalls[index].function.arguments + tc.function.arguments,
+          },
+        }
+    })
   }
   if (choice.finish_reason === 'stop') {
     // get usage / timings if provided
@@ -117,13 +127,11 @@ for await (const chunk of response) {
   }
 }
 
-result.messages = [
-  ...messages,
-  {
-    role: 'assistant',
-    content,
-  },
-]
+const assistantMessage = { role: 'assistant' }
+if (content) assistantMessage.content = content
+if (toolCalls.length) assistantMessage.tool_calls = toolCalls
+
+result.messages = [...messages, assistantMessage]
 
 const out = path.resolve(pwd, argv['output'] || `${argv['file']}.out`)
 TOMLStream.toTOMLString(result, (err, data) => {
