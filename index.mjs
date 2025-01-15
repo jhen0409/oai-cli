@@ -6,6 +6,7 @@ import TOMLStream from 'toml-stream'
 import fs from 'fs'
 import path from 'path'
 import minimist from 'minimist'
+import json5 from 'json5'
 
 const home = process.env.HOME
 
@@ -15,17 +16,20 @@ if (!fs.existsSync(`${home}/.oai-cli.toml`)) {
     'endpoint = "https://api.openai.com/v1"\n' +
       'model = "gpt-4o-mini"\n\n' +
       '[[configs]]\n' +
-      'name = "default"\n' +
+      'name = "example"\n' +
       'model = "gpt-4o-mini"\n' +
-      'endpoint = "https://api.openai.com/v1/chat/completions"\n' +
+      'endpoint = "https://api.openai.com/v1"\n' +
       'apiKey = "sk-..."',
+  )
+  throw new Error(
+    'Created ~/.oai-cli.toml because it was missing. Please update ~/.oai-cli.toml to continue.',
   )
 }
 
 const config = toml.parse(fs.readFileSync(`${home}/.oai-cli.toml`, 'utf8'))
 
 const argv = minimist(process.argv.slice(2), {
-  string: ['file', 'model', 'output', 'endpoint', 'config'],
+  string: ['file', 'model', 'output', 'endpoint', 'config', 'ignore-tools'],
   number: ['temperature'],
   alias: {
     f: 'file',
@@ -35,6 +39,7 @@ const argv = minimist(process.argv.slice(2), {
     t: 'temperature',
     temp: 'temperature',
     c: 'config',
+    nt: 'ignore-tools',
   },
 })
 
@@ -74,11 +79,22 @@ if (!argv['file']) {
 const pwd = process.cwd()
 const file = path.resolve(pwd, argv['file'])
 
-const { messages } = toml.parse(fs.readFileSync(file, 'utf8'))
+const { messages, tools: toolsString } = toml.parse(fs.readFileSync(file, 'utf8'))
+
+let tools
+if (toolsString && !argv['ignore-tools']) {
+  try {
+    tools = json5.parse(toolsString)
+  } catch (e) {
+    console.error('Tools are not valid JSON', e.message)
+    process.exit(1)
+  }
+}
 
 const response = await oai.chat.completions.create({
   model,
   messages,
+  tools,
   max_tokens: -1,
   temperature: argv['temperature'] || 0.8,
   stream: true,

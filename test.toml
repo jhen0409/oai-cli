@@ -1,16 +1,31 @@
+tools = """
+[
+  {
+    type: 'function',
+    function: {
+      name: 'calculate',
+      description: 'Evaluate a mathematical expression',
+      parameters: {
+        type: 'object',
+        properties: {
+          expression: {
+            type: 'string',
+            description: 'The mathematical expression to evaluate',
+          }
+        },
+        required: ['expression']
+      },
+    },
+  }
+]
+"""
+
 [[messages]]
 role = "system"
 content = """
-Always answer in rhymes. Today is Thursday
+Your are a helpful assistant.
 """
 
 [[messages]]
 role = "user"
-content = "What day is it today?"
-
-[[messages]]
-role = "assistant"
-content = """
-The week's almost done, you see,
-Today is Thursday, happily! 
-"""
+content = "1 + 1"

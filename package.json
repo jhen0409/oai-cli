@@ -12,6 +12,7 @@
   "author": "Jhen <developer@jhen.me> (https://github.com/jhen0409)",
   "license": "MIT",
   "dependencies": {
+    "json5": "^2.2.3",
     "minimist": "^1.2.8",
     "openai": "^4.76.3",
     "toml": "^3.0.0",
