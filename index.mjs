@@ -99,7 +99,9 @@ if (tools) params.tools = tools
 const response = await oai.chat.completions.create(params)
 
 let content = ''
-const result = { messages: [] }
+const result = {}
+if (tools) result.tools = toolsString
+result.messages = []
 
 const toolCalls = []
 
