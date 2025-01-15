@@ -10,14 +10,22 @@ import minimist from 'minimist'
 const home = process.env.HOME
 
 if (!fs.existsSync(`${home}/.oai-cli.toml`)) {
-  console.error('Please create ~/.oai-cli.toml')
-  process.exit(1)
+  fs.writeFileSync(
+    `${home}/.oai-cli.toml`,
+    'endpoint = "https://api.openai.com/v1"\n' +
+      'model = "gpt-4o-mini"\n\n' +
+      '[[configs]]\n' +
+      'name = "default"\n' +
+      'model = "gpt-4o-mini"\n' +
+      'endpoint = "https://api.openai.com/v1/chat/completions"\n' +
+      'apiKey = "sk-..."',
+  )
 }
 
 const config = toml.parse(fs.readFileSync(`${home}/.oai-cli.toml`, 'utf8'))
 
 const argv = minimist(process.argv.slice(2), {
-  string: ['file', 'model', 'output', 'endpoint'],
+  string: ['file', 'model', 'output', 'endpoint', 'config'],
   number: ['temperature'],
   alias: {
     f: 'file',
@@ -26,12 +34,36 @@ const argv = minimist(process.argv.slice(2), {
     e: 'endpoint',
     t: 'temperature',
     temp: 'temperature',
+    c: 'config',
   },
 })
 
+let endpoint = argv['endpoint']
+let model = argv['model'] || config.model
+let apiKey = config.apiKey || process.env.OPENAI_API_KEY || 'NOPE'
+
+if (argv['config']) {
+  const configItem = config.configs.find((c) => c.name === argv['config'])
+  if (!configItem) {
+    console.error(`Config ${argv['config']} not found`)
+    process.exit(1)
+  }
+  if (!configItem.endpoint) {
+    console.error('Config endpoint is required')
+    process.exit(1)
+  }
+  if (!config.model) {
+    console.error('Config model is required')
+    process.exit(1)
+  }
+  endpoint = configItem.endpoint
+  model = configItem.model
+  apiKey = configItem.apiKey || apiKey
+}
+
 const oai = new OpenAI({
-  baseURL: argv['endpoint'] || config.baseURL,
-  apiKey: config.apiKey || process.env.OPENAI_API_KEY || 'NOPE',
+  baseURL: endpoint,
+  apiKey,
 })
 
 if (!argv['file']) {
@@ -45,7 +77,7 @@ const file = path.resolve(pwd, argv['file'])
 const { messages } = toml.parse(fs.readFileSync(file, 'utf8'))
 
 const response = await oai.chat.completions.create({
-  model: argv['model'] || config.defaultModel,
+  model,
   messages,
   max_tokens: -1,
   temperature: argv['temperature'] || 0.8,

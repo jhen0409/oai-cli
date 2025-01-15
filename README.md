@@ -10,11 +10,16 @@ npm install -g oai-cli
 
 ## Usage
 
-Config file is `~/.oai-cli.toml`:
+Config file is `~/.oai-cli.toml`, example:
 
 ```toml
-baseURL = "http://localhost:1234/v1" # e.g. a llama.cpp server or a local server by LM Studio
-defaultModel = "gemma-2-27b-it"
+endpoint = "http://localhost:1234/v1" # e.g. a llama.cpp server or a local server by LM Studio
+model = "gemma-2-27b-it"
+
+[[configs]]
+name = "jetson"
+model = "gemma-2-2b-it"
+endpoint = "http://192.168.55.1:8080/v1"
 ```
 
 Flags
@@ -45,6 +50,12 @@ Run:
 
 ```bash
 oai -f ./input.toml -o ./output.toml
+```
+
+Use config:
+
+```bash
+oai -c jetson -f ./input.toml -o ./output.toml
 ```
 
 Result:
