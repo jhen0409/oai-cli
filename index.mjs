@@ -29,8 +29,9 @@ if (!fs.existsSync(`${home}/.oai-cli.toml`)) {
 const config = toml.parse(fs.readFileSync(`${home}/.oai-cli.toml`, 'utf8'))
 
 const argv = minimist(process.argv.slice(2), {
-  string: ['file', 'model', 'output', 'endpoint', 'config', 'ignore-tools'],
+  string: ['file', 'model', 'output', 'endpoint', 'config'],
   number: ['temperature'],
+  boolean: ['ignore-tools'],
   alias: {
     f: 'file',
     m: 'model',
@@ -87,13 +88,15 @@ if (toolsString && !argv['ignore-tools']) {
   }
 }
 
-const response = await oai.chat.completions.create({
+const params = {
   model,
   messages,
-  tools,
   temperature: argv['temperature'] || 0.8,
   stream: true,
-})
+}
+if (tools) params.tools = tools
+
+const response = await oai.chat.completions.create(params)
 
 let content = ''
 const result = { messages: [] }
