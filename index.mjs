@@ -85,27 +85,31 @@ const response = await oai.chat.completions.create({
 })
 
 let content = ''
+const result = { messages: [] }
 
 for await (const chunk of response) {
-  const delta = chunk.choices[0].delta.content
+  const choice = chunk.choices[0]
+  const delta = choice.delta.content
   if (delta) {
     content += delta
     process.stdout.write(delta)
   }
+  if (choice.finish_reason === 'stop') {
+    // get usage / timings if provided
+    if (chunk.usage) result.usage = chunk.usage
+    if (chunk.timings) result.timings = chunk.timings
+  }
 }
 
-const out = path.resolve(pwd, argv['output'] || `${argv['file']}.out`)
-TOMLStream.toTOMLString(
+result.messages = [
+  ...messages,
   {
-    messages: [
-      ...messages,
-      {
-        role: 'assistant',
-        content,
-      },
-    ],
+    role: 'assistant',
+    content,
   },
-  (err, data) => {
-    fs.writeFileSync(out, data)
-  },
-)
+]
+
+const out = path.resolve(pwd, argv['output'] || `${argv['file']}.out`)
+TOMLStream.toTOMLString(result, (err, data) => {
+  fs.writeFileSync(out, data)
+})
