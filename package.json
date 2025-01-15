@@ -1,6 +1,6 @@
 {
   "name": "oai-cli",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Simple & opinional completion CLI for OpenAI-Compatibility API",
   "main": "index.mjs",
   "bin": {
