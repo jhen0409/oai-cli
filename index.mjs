@@ -93,6 +93,9 @@ const params = {
   messages,
   temperature: argv['temperature'] || 0.8,
   stream: true,
+  stream_options: {
+    include_usage: true,
+  },
 }
 if (tools) params.tools = tools
 
