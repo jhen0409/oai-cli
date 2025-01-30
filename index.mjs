@@ -107,7 +107,9 @@ const toolCalls = []
 
 for await (const chunk of response) {
   const choice = chunk.choices[0]
-  const { content: deltaContent, tool_calls: deltaToolCalls } = choice.delta
+  if (!choice) continue
+
+  const { content: deltaContent, tool_calls: deltaToolCalls } = choice.delta || {}
   if (deltaContent) {
     content += deltaContent
     process.stdout.write(deltaContent)
@@ -125,7 +127,7 @@ for await (const chunk of response) {
         }
     })
   }
-  if (choice.finish_reason === 'stop') {
+  if (choice?.finish_reason === 'stop') {
     // get usage / timings if provided
     if (chunk.usage) result.usage = chunk.usage
     if (chunk.timings) result.timings = chunk.timings
