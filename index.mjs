@@ -48,6 +48,7 @@ let endpoint = argv['endpoint']
 let model = argv['model'] || config.model
 let apiKey = config.apiKey || process.env.OPENAI_API_KEY || 'NOPE'
 
+let additionalParams = {}
 if (argv['config']) {
   const configItem = config.configs.find((c) => c.name === argv['config'])
   if (!configItem) {
@@ -61,6 +62,7 @@ if (argv['config']) {
   if (configItem.endpoint) endpoint = configItem.endpoint
   model = configItem.model
   apiKey = configItem.apiKey || apiKey
+  additionalParams = configItem.params || {}
 }
 
 const oai = new OpenAI({
@@ -89,9 +91,10 @@ if (toolsString && !argv['ignore-tools']) {
 }
 
 const params = {
+  temperature: argv['temperature'] || 0.8,
+  ...additionalParams,
   model,
   messages,
-  temperature: argv['temperature'] || 0.8,
   stream: true,
   stream_options: {
     include_usage: true,
